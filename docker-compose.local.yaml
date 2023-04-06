@@ -1,0 +1,24 @@
+version: "3.4"
+
+services:
+    app:
+        container_name: ${APP_NAME}-back-local-app
+        volumes:
+            - ${PWD}:/srv
+        build:
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+            target: local
+            context: ${PWD}
+
+    nginx:
+        container_name: ${APP_NAME}-back-local-nginx
+        volumes:
+            - ${PWD}/.docker/env/local/nginx.conf:/etc/nginx/nginx.conf
+        ports:
+            - "8000:80"
+    db:
+        container_name: ${APP_NAME}-back-local-db
+    redis:
+        container_name: ${APP_NAME}-back-local-redis
