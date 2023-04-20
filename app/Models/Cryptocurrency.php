@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Database\Factories\CryptocurrencyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Orchid\Attachment\Attachable;
+use Orchid\Filters\Filterable;
+use Orchid\Screen\AsSource;
 
 /**
  * @property string                          $id
@@ -17,6 +20,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Cryptocurrency extends Model
 {
     use HasFactory;
+
+    use AsSource;
+
+    use Filterable;
+
+    use Attachable;
 
     protected $fillable = [
         'name',

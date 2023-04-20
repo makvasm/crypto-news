@@ -13,7 +13,7 @@ COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 
 FROM base as local
 COPY ${PWD}/.docker/env/local/php.ini $PHP_INI_DIR/php.ini
-COPY ${PWD}/.docker/env/local/nginx.conf /etc/nginx/nginx.conf
+#COPY ${PWD}/.docker/env/local/nginx.conf /etc/nginx/nginx.conf
 RUN apk add git nano
 RUN adduser -u ${UID} -s /bin/sh -D user
 USER user

@@ -1,4 +1,4 @@
 postgres_data
 docker-compose.*
-Dockerfile
+*Dockerfile
 Makefile

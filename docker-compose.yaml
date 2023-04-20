@@ -9,17 +9,20 @@ services:
     networks:
       - internal
     build:
-      context: ${PWD}
+        dockerfile: app.Dockerfile
+        context: ${PWD}
     links:
       - db
       - redis
   nginx:
-    networks:
-      - internal
-    restart: always
-    image: nginx:1.23.3-alpine-perl
-    links:
-      - app
+      networks:
+          - internal
+      restart: always
+      build:
+          dockerfile: nginx.Dockerfile
+          context: ${PWD}
+      links:
+          - app
   db:
     networks:
       - internal
