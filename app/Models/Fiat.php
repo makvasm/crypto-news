@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Database\Factories\FiatFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Orchid\Attachment\Attachable;
+use Orchid\Filters\Filterable;
+use Orchid\Screen\AsSource;
 
 /**
  * @property string $id
@@ -13,7 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Fiat extends Model
 {
-    use HasFactory;
+    use HasFactory, AsSource, Attachable, Filterable;
 
     protected $fillable = [
         'name',
