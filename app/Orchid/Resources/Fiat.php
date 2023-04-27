@@ -16,7 +16,7 @@ class Fiat extends Resource
      */
     public static $model = \App\Models\Fiat::class;
 
-     public static function singularLabel(): string
+    public static function singularLabel(): string
     {
         return __('Фиат');
     }

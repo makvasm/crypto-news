@@ -3,7 +3,9 @@
 namespace App\Services\Cryptocurrency\DataMappers;
 
 use App\Services\Cryptocurrency\Structs\Cryptocurrency;
+use App\Services\Cryptocurrency\Structs\CryptocurrencyListingResponse;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyListResponse;
+use App\Services\Cryptocurrency\Structs\Quote;
 
 class CryptocurrencyDataMapper implements Contracts\CryptocurrencyDataMapper
 {
@@ -25,5 +27,30 @@ class CryptocurrencyDataMapper implements Contracts\CryptocurrencyDataMapper
             'external_id' => $cryptocurrency->external_id,
             'is_active'   => false,
         ];
+    }
+
+    public function jsonToCryptocurrencyListingResponse(string $json): CryptocurrencyListingResponse
+    {
+        $data = array_map(
+            function ($cryptoCurrency) {
+                $quotes = [];
+                foreach ($cryptoCurrency->quote as $symbol => $quote) {
+                    $quotes[] = new Quote(
+                        $symbol,
+                        $quote->price,
+                        $quote->percent_change_1h ?? null,
+                        $quote->percent_change_24h ?? null,
+                        $quote->percent_change_7d ?? null,
+                        $quote->percent_change_30d ?? null,
+                        $quote->last_updated ?? null,
+                    );
+                }
+
+                return new Cryptocurrency($cryptoCurrency->name, $cryptoCurrency->symbol, $cryptoCurrency->id, null, $quotes);
+            },
+            json_decode($json)->data
+        );
+
+        return new CryptocurrencyListingResponse($data);
     }
 }

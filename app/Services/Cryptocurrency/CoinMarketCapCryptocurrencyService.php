@@ -4,6 +4,7 @@ namespace App\Services\Cryptocurrency;
 
 use App\Services\Cryptocurrency\Contracts\CryptocurrencyService;
 use App\Services\Cryptocurrency\DataMappers\Contracts\CryptocurrencyDataMapper;
+use App\Services\Cryptocurrency\Structs\CryptocurrencyListingResponse;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyListResponse;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyResponse;
 use Exception;
@@ -88,5 +89,26 @@ class CoinMarketCapCryptocurrencyService implements CryptocurrencyService
     public function getPlatformName(): string
     {
         return 'coin_market_cap';
+    }
+
+    public function getFiatsToExchange(): array
+    {
+        return ['RUB'];
+    }
+
+    public function getListing(): CryptocurrencyListingResponse
+    {
+        try {
+            $request = new Request('GET', 'cryptocurrency/listings/latest');
+            $response = $this->request($request);
+
+            return $this->dataMapper->jsonToCryptocurrencyListingResponse(
+                $response->getBody()
+                         ->getContents()
+            );
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
+            throw $e;
+        }
     }
 }

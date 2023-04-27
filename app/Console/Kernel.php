@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\ImportCryptocurrencies;
+use App\Jobs\ImportCryptocurrenciesQuotes;
 use App\Jobs\ImportFiats;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -22,6 +23,8 @@ class Kernel extends ConsoleKernel
                  ->dailyAt('10:00');
         $schedule->job(ImportFiats::class)
                  ->dailyAt('10:00');
+        $schedule->job(ImportCryptocurrenciesQuotes::class)
+                 ->hourly();
     }
 
     /**
