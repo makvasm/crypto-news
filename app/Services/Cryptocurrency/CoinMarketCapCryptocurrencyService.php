@@ -6,6 +6,7 @@ use App\Services\Cryptocurrency\Contracts\CryptocurrencyService;
 use App\Services\Cryptocurrency\DataMappers\Contracts\CryptocurrencyDataMapper;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyListingResponse;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyListResponse;
+use App\Services\Cryptocurrency\Structs\CryptocurrencyQuotesResponse;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyResponse;
 use Exception;
 use GuzzleHttp\Psr7\Request;
@@ -46,7 +47,7 @@ class CoinMarketCapCryptocurrencyService implements CryptocurrencyService
     public function getCryptocurrencyList(): CryptocurrencyListResponse
     {
         try {
-            $request = new Request('GET', 'cryptocurrency/map');
+            $request = new Request('GET', 'v1/cryptocurrency/map');
             $response = $this->request($request);
 
             return $this->dataMapper->jsonToCryptocurrencyListResponse(
@@ -76,9 +77,9 @@ class CoinMarketCapCryptocurrencyService implements CryptocurrencyService
     protected function getPreparedUri($path): UriInterface
     {
         $host = rtrim($this->host, '/');
-        $pathWithoutVersion = ltrim($path, '/');
+        $path = ltrim($path, '/');
 
-        return new Uri("{$host}/v{$this->version}/{$pathWithoutVersion}");
+        return new Uri("{$host}/$path");
     }
 
     public function getCryptocurrency(): CryptocurrencyResponse
@@ -99,10 +100,30 @@ class CoinMarketCapCryptocurrencyService implements CryptocurrencyService
     public function getListing(): CryptocurrencyListingResponse
     {
         try {
-            $request = new Request('GET', 'cryptocurrency/listings/latest');
+            $request = new Request('GET', 'v1/cryptocurrency/listings/latest');
             $response = $this->request($request);
 
             return $this->dataMapper->jsonToCryptocurrencyListingResponse(
+                $response->getBody()
+                         ->getContents()
+            );
+        } catch (Exception $e) {
+            $this->logger->error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getQuotes(array $symbols, ?array $convert = null): CryptocurrencyQuotesResponse
+    {
+        try {
+            $query = http_build_query([
+                'symbol'  => implode(',', $symbols),
+                'convert' => $convert ? implode(',', $convert) : null,
+            ]);
+            $request = new Request('GET', "v2/cryptocurrency/quotes/latest?$query");
+            $response = $this->request($request);
+
+            return $this->dataMapper->jsonToCryptocurrencyQuotesResponse(
                 $response->getBody()
                          ->getContents()
             );

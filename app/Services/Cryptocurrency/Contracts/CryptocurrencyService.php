@@ -4,6 +4,7 @@ namespace App\Services\Cryptocurrency\Contracts;
 
 use App\Services\Cryptocurrency\Structs\CryptocurrencyListingResponse;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyListResponse;
+use App\Services\Cryptocurrency\Structs\CryptocurrencyQuotesResponse;
 use App\Services\Cryptocurrency\Structs\CryptocurrencyResponse;
 
 interface CryptocurrencyService
@@ -20,4 +21,6 @@ interface CryptocurrencyService
     public function getFiatsToExchange(): array;
 
     public function getListing(): CryptocurrencyListingResponse;
+
+    public function getQuotes(array $symbols, ?array $convert = null): CryptocurrencyQuotesResponse;
 }
