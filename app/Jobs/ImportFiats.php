@@ -6,6 +6,7 @@ use App\Models\Fiat;
 use App\Models\FiatExternalId;
 use App\Services\Fiat\Contracts\FiatService;
 use App\Services\Fiat\DataMappers\Contracts\FiatDataMapper;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\QueryException;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ImportFiats implements ShouldQueue
 {
@@ -50,25 +52,29 @@ class ImportFiats implements ShouldQueue
      */
     public function handle(FiatService $fiatService, FiatDataMapper $dataMapper)
     {
-        $fiatList = $fiatService->getFiatList();
-        foreach ($fiatList->fiats as $currency) {
-            $currencyModel = new Fiat($dataMapper->fiatToArray($currency));
-            $externalId = new FiatExternalId([
-                'platform' => $fiatService->getPlatformName(),
-                'value'    => $currency->external_id,
-            ]);
-            try {
-                DB::transaction(function () use ($currencyModel, $externalId) {
-                    $currencyModel->saveOrFail();
-                    $externalId->fiat()
-                               ->associate($currencyModel)
-                               ->saveOrFail();
-                });
-            } catch (QueryException $e) {
-                if ($e->getCode() === 23505) {
-                    continue;
+        try {
+            $fiatList = $fiatService->getFiatList();
+            foreach ($fiatList->fiats as $currency) {
+                $currencyModel = new Fiat($dataMapper->fiatToArray($currency));
+                $externalId = new FiatExternalId([
+                    'platform' => $fiatService->getPlatformName(),
+                    'value'    => $currency->external_id,
+                ]);
+                try {
+                    DB::transaction(function () use ($currencyModel, $externalId) {
+                        $currencyModel->saveOrFail();
+                        $externalId->fiat()
+                                   ->associate($currencyModel)
+                                   ->saveOrFail();
+                    });
+                } catch (QueryException $e) {
+                    if ($e->getCode() === 23505) {
+                        continue;
+                    }
                 }
             }
+        } catch (Exception $e) {
+            Log::error($e);
         }
     }
 }

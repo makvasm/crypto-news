@@ -6,6 +6,7 @@ use App\Models\Cryptocurrency;
 use App\Models\CryptocurrencyExternalId;
 use App\Services\Cryptocurrency\Contracts\CryptocurrencyService;
 use App\Services\Cryptocurrency\DataMappers\Contracts\CryptocurrencyDataMapper;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\QueryException;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ImportCryptocurrencies implements ShouldQueue
 {
@@ -50,26 +52,29 @@ class ImportCryptocurrencies implements ShouldQueue
      */
     public function handle(CryptocurrencyService $cryptocurrencyService, CryptocurrencyDataMapper $dataMapper)
     {
-        $currenciesList = $cryptocurrencyService->getCryptocurrencyList();
-        $timeStart = now();
-        foreach ($currenciesList->cryptocurrencies as $currency) {
-            $currencyModel = new Cryptocurrency($dataMapper->cryptocurrencyToArray($currency));
-            $externalId = new CryptocurrencyExternalId([
-                'platform' => $cryptocurrencyService->getPlatformName(),
-                'value'    => $currency->external_id,
-            ]);
-            try {
-                DB::transaction(function () use ($currencyModel, $externalId) {
-                    $currencyModel->saveOrFail();
-                    $externalId->cryptocurrency()
-                               ->associate($currencyModel)
-                               ->saveOrFail();
-                });
-            } catch (QueryException $e) {
-                if ($e->getCode() === 23505) {
-                    continue;
+        try {
+            $currenciesList = $cryptocurrencyService->getCryptocurrencyList();
+            foreach ($currenciesList->cryptocurrencies as $currency) {
+                $currencyModel = new Cryptocurrency($dataMapper->cryptocurrencyToArray($currency));
+                $externalId = new CryptocurrencyExternalId([
+                    'platform' => $cryptocurrencyService->getPlatformName(),
+                    'value'    => $currency->external_id,
+                ]);
+                try {
+                    DB::transaction(function () use ($currencyModel, $externalId) {
+                        $currencyModel->saveOrFail();
+                        $externalId->cryptocurrency()
+                                   ->associate($currencyModel)
+                                   ->saveOrFail();
+                    });
+                } catch (QueryException $e) {
+                    if ($e->getCode() === 23505) {
+                        continue;
+                    }
                 }
             }
+        } catch (Exception $e) {
+            Log::error($e);
         }
     }
 }

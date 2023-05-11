@@ -6,6 +6,7 @@ use App\Models\CryptocurrencyExternalId;
 use App\Models\CryptocurrencyQuote;
 use App\Models\Fiat;
 use App\Services\Cryptocurrency\Contracts\CryptocurrencyService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\QueryException;
@@ -52,37 +53,41 @@ class UpdateSpecificCryptocurrenciesQuotes implements ShouldQueue
      */
     public function handle(CryptocurrencyService $cryptocurrencyService)
     {
-        $quotes = $cryptocurrencyService->getQuotes($this->symbols, $this->convert);
-        foreach ($quotes->cryptocurrencies as $currency) {
-            foreach ($currency->quotes as $quote) {
-                try {
-                    /** @var CryptocurrencyExternalId $cryptocurrencyExternalId */
-                    $cryptocurrencyExternalId = CryptocurrencyExternalId::query()
-                                                                        ->where('value', $currency->external_id)
-                                                                        ->where('platform', $cryptocurrencyService->getPlatformName())
-                                                                        ->with(['cryptocurrency'])
-                                                                        ->firstOrFail();
-                    $cryptocurrencyModel = $cryptocurrencyExternalId->cryptocurrency;
-                    $fiat = Fiat::where('symbol', $quote->currency_symbol)
-                                ->firstOrFail();
+        try {
+            $quotes = $cryptocurrencyService->getQuotes($this->symbols, $this->convert);
+            foreach ($quotes->cryptocurrencies as $currency) {
+                foreach ($currency->quotes as $quote) {
+                    try {
+                        /** @var CryptocurrencyExternalId $cryptocurrencyExternalId */
+                        $cryptocurrencyExternalId = CryptocurrencyExternalId::query()
+                                                                            ->where('value', $currency->external_id)
+                                                                            ->where('platform', $cryptocurrencyService->getPlatformName())
+                                                                            ->with(['cryptocurrency'])
+                                                                            ->firstOrFail();
+                        $cryptocurrencyModel = $cryptocurrencyExternalId->cryptocurrency;
+                        $fiat = Fiat::where('symbol', $quote->currency_symbol)
+                                    ->firstOrFail();
 
-                    $quoteModel = new CryptocurrencyQuote([
-                        'price'               => $quote->price,
-                        'percent_change_hour' => $quote->percent_change_hour,
-                        'percent_change_day'  => $quote->percent_change_day,
-                        'percent_change_week' => $quote->percent_change_week,
-                        'last_updated'        => $quote->last_updated,
-                    ]);
-                    $quoteModel->cryptocurrency()
-                               ->associate($cryptocurrencyModel);
-                    $quoteModel->fiat()
-                               ->associate($fiat);
-                    $quoteModel->saveOrFail();
-                } catch (QueryException $e) {
-                    Log::error($e);
-                    continue;
+                        $quoteModel = new CryptocurrencyQuote([
+                            'price'               => $quote->price,
+                            'percent_change_hour' => $quote->percent_change_hour,
+                            'percent_change_day'  => $quote->percent_change_day,
+                            'percent_change_week' => $quote->percent_change_week,
+                            'last_updated'        => $quote->last_updated,
+                        ]);
+                        $quoteModel->cryptocurrency()
+                                   ->associate($cryptocurrencyModel);
+                        $quoteModel->fiat()
+                                   ->associate($fiat);
+                        $quoteModel->saveOrFail();
+                    } catch (QueryException $e) {
+                        Log::error($e);
+                        continue;
+                    }
                 }
             }
+        } catch (Exception $e) {
+            Log::error($e);
         }
     }
 }
