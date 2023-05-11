@@ -19,3 +19,4 @@ yarn-error.log
 adminer.php
 Makefile
 postgres_data
+.php-cs-fixer.cache
