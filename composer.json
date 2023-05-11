@@ -14,7 +14,8 @@
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "orchid/crud": "^3.9",
-        "predis/predis": "^2.1"
+        "predis/predis": "^2.1",
+        "rebing/graphql-laravel": "^8.6"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
