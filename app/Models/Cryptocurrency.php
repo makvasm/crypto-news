@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\CryptocurrencyFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Attachment\Attachable;
 use Orchid\Filters\Filterable;
@@ -14,8 +15,9 @@ use Orchid\Screen\AsSource;
  * @property string                          $symbol
  * @property bool                            $is_active
  * @property-read CryptocurrencyExternalId[] $externalIds
- * @property-read CryptocurrencyExternalId   $externalId
  * @property-read News[]                     $news
+ * @property-read CryptocurrencyQuote[]      $quotes
+ * @method static Builder active()
  */
 class Cryptocurrency extends Model
 {
@@ -54,5 +56,15 @@ class Cryptocurrency extends Model
     {
         return $this->belongsToMany(News::class, 'cryptocurrency_news')
                     ->using(CryptocurrencyNews::class);
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function quotes()
+    {
+        return $this->hasMany(CryptocurrencyQuote::class);
     }
 }
