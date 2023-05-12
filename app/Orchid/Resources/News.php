@@ -29,6 +29,11 @@ class News extends Resource
         return __('Новости');
     }
 
+    public function with(): array
+    {
+        return ['cryptocurrencies'];
+    }
+
     /**
      * Get the fields displayed by the resource.
      *
@@ -41,7 +46,7 @@ class News extends Resource
                  ->title(__('Заголовок')),
             TextArea::make('content')
                     ->title(__('Содержание')),
-            Relation::make('cryptocurrencies')
+            Relation::make('cryptocurrencies.')
                     ->fromModel(\App\Models\Cryptocurrency::class, 'name')
                     ->multiple()
                     ->title(__('Криптовалюты')),

@@ -55,7 +55,8 @@ class Cryptocurrency extends Model
     public function news()
     {
         return $this->belongsToMany(News::class, 'cryptocurrency_news')
-                    ->using(CryptocurrencyNews::class);
+                    ->using(CryptocurrencyNews::class)
+                    ->withTimestamps();
     }
 
     public function scopeActive(Builder $query): Builder

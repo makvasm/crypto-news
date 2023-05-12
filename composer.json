@@ -14,6 +14,7 @@
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "orchid/crud": "^3.9",
+        "orchid/platform": "^13.10",
         "predis/predis": "^2.1",
         "rebing/graphql-laravel": "^8.6"
     },

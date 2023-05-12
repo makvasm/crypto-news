@@ -24,6 +24,11 @@ class News extends Model
 
     use Attachable;
 
+    protected $fillable = [
+        'title',
+        'content',
+    ];
+
     protected static function newFactory()
     {
         return NewsFactory::new();
@@ -32,6 +37,7 @@ class News extends Model
     public function cryptocurrencies()
     {
         return $this->belongsToMany(Cryptocurrency::class, 'cryptocurrency_news')
-                    ->using(CryptocurrencyNews::class);
+                    ->using(CryptocurrencyNews::class)
+                    ->withTimestamps();
     }
 }
