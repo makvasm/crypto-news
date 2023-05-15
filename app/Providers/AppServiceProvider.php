@@ -10,6 +10,10 @@ use App\Services\Fiat\CoinMarketCapFiatService;
 use App\Services\Fiat\Contracts\FiatService;
 use App\Services\Fiat\DataMappers\Contracts\FiatDataMapper as FiatDataMapperContract;
 use App\Services\Fiat\DataMappers\FiatDataMapper;
+use App\Services\Search\Contracts\NewsSearchService;
+use App\Services\Search\NewsElasticSearchService;
+use Elastic\Elasticsearch\Client as ElasticsearchClient;
+use Elastic\Elasticsearch\ClientBuilder;
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
 use Monolog\Logger;
@@ -36,6 +40,12 @@ class AppServiceProvider extends ServiceProvider
                   ->give(fn () => new Client());
         $this->app->bind(FiatDataMapperContract::class, FiatDataMapper::class);
         $this->app->bind(FiatService::class, CoinMarketCapFiatService::class);
+        $this->app->bind(ElasticsearchClient::class, function ($app) {
+            return ClientBuilder::create()
+                                ->setHosts(config('elasticsearch.hosts'))
+                                ->build();
+        });
+        $this->app->bind(NewsSearchService::class, NewsElasticSearchService::class);
     }
 
     /**

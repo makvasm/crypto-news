@@ -22,3 +22,12 @@ services:
         container_name: ${APP_NAME}-back-local-db
     redis:
         container_name: ${APP_NAME}-back-local-redis
+    elasticsearch:
+        container_name: ${APP_NAME}-back-local-elasticsearch
+        environment:
+            - xpack.security.enabled=false
+            - discovery.type=single-node
+            - node.name=elasticsearch
+            - cluster.name=elasticsearch
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"

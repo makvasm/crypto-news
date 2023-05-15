@@ -1,41 +1,59 @@
 version: "3.4"
 
 networks:
-  internal:
-    driver: bridge
+    internal:
+        driver: bridge
 
 services:
-  app:
-    networks:
-      - internal
-    build:
-        dockerfile: app.Dockerfile
-        context: ${PWD}
-    links:
-      - db
-      - redis
-  nginx:
-      networks:
-          - internal
-      restart: always
-      build:
-          dockerfile: nginx.Dockerfile
-          context: ${PWD}
-      links:
-          - app
-  db:
-    networks:
-      - internal
-    restart: always
-    volumes:
-      - ${PWD}/postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_DB: ${DB_DATABASE}
-    image: postgres:15.2-alpine3.17
-  redis:
-    networks:
-      - internal
-    restart: always
-    image: redis:7.0.9-alpine3.17
+    app:
+        networks:
+            - internal
+        build:
+            dockerfile: app.Dockerfile
+            context: ${PWD}
+        links:
+            - db
+            - redis
+            - elasticsearch
+    nginx:
+        networks:
+            - internal
+        restart: always
+        build:
+            dockerfile: nginx.Dockerfile
+            context: ${PWD}
+        links:
+            - app
+    db:
+        networks:
+            - internal
+        restart: always
+        volumes:
+            - ${PWD}/postgres_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_DB: ${DB_DATABASE}
+        image: postgres:15.2-alpine3.17
+    redis:
+        networks:
+            - internal
+        restart: always
+        image: redis:7.0.9-alpine3.17
+    elasticsearch:
+        networks:
+            - internal
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        restart: always
+        image: elasticsearch:8.7.1
+        volumes:
+            - esdata:/usr/share/elasticsearch/data
+        ports:
+            - "9200:9200"
+
+volumes:
+    esdata:
+        driver: local

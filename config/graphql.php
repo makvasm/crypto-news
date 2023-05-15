@@ -89,6 +89,7 @@ return [
             'query'                => [
                 Queries\Cryptocurrencies::class,
                 Queries\Fiats::class,
+                Queries\News::class,
             ],
             'mutation'             => [
                 Mutations\UpdateCryptocurrenciesQuotes::class,

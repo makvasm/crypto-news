@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Search\Contracts\Searchable;
 use Database\Factories\NewsFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Attachment\Attachable;
@@ -14,7 +15,7 @@ use Orchid\Screen\AsSource;
  * @property string                $content
  * @property-read Cryptocurrency[] $cryptocurrencies
  */
-class News extends Model
+class News extends Model implements Searchable
 {
     use HasFactory;
 
@@ -23,6 +24,8 @@ class News extends Model
     use Filterable;
 
     use Attachable;
+
+    use Traits\Searchable;
 
     protected $fillable = [
         'title',
