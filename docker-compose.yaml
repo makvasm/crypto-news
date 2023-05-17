@@ -11,6 +11,7 @@ services:
         build:
             dockerfile: app.Dockerfile
             context: ${PWD}
+        restart: on-failure
         links:
             - db
             - redis
@@ -18,7 +19,7 @@ services:
     nginx:
         networks:
             - internal
-        restart: always
+        restart: on-failure
         build:
             dockerfile: nginx.Dockerfile
             context: ${PWD}
@@ -27,7 +28,7 @@ services:
     db:
         networks:
             - internal
-        restart: always
+        restart: on-failure
         volumes:
             - ${PWD}/postgres_data:/var/lib/postgresql/data
         environment:
@@ -38,7 +39,7 @@ services:
     redis:
         networks:
             - internal
-        restart: always
+        restart: on-failure
         image: redis:7.0.9-alpine3.17
     elasticsearch:
         networks:
@@ -47,7 +48,7 @@ services:
             memlock:
                 soft: -1
                 hard: -1
-        restart: always
+        restart: on-failure
         image: elasticsearch:8.7.1
         volumes:
             - esdata:/usr/share/elasticsearch/data
