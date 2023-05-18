@@ -17,7 +17,8 @@
         "orchid/crud": "^3.9",
         "orchid/platform": "^13.10",
         "predis/predis": "^2.1",
-        "rebing/graphql-laravel": "^8.6"
+        "rebing/graphql-laravel": "^8.6",
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^13.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

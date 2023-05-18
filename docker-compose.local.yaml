@@ -31,3 +31,5 @@ services:
             - cluster.name=elasticsearch
             - bootstrap.memory_lock=true
             - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    rabbitmq:
+        container_name: ${APP_NAME}-back-local-rabbitmq
